@@ -1,0 +1,324 @@
+{extend name='extra@admin/content'}
+
+{block name="button"}
+<div class="nowrap pull-right" style="margin-top:10px">
+    <button data-modal='{:url("$classuri/add")}' data-title="添加下注牛人" class='layui-btn layui-btn-small'><i
+            class='fa fa-plus'></i> 添加下注牛人
+    </button>
+    <button data-update data-field='delete' data-action='{:url("$classuri/del")}'
+            class='layui-btn layui-btn-small layui-btn-danger'><i class='fa fa-remove'></i> 删除下注人
+    </button>
+    <button data-update data-field='countpay' data-action='{:url("$classuri/countpay")}'
+            class='layui-btn layui-btn-small layui-btn-success'><i class='fa fa-trophy'></i> 生成赔付
+    </button>
+    <button data-update data-field='gamedone' data-action='{:url("$classuri/gamedone")}'
+            class='layui-btn layui-btn-small layui-btn-wring'><i class='fa fa-legal'></i> 游戏完成
+    </button>
+
+</div>
+{/block}
+
+{block name="content"}
+<div class="ibox">
+    <div class="ibox-title"  data-toggle="collapse" href="#collapseG2">
+        <span class="icon"><i class="icon-chevron-down"></i></span>
+        <h5>牛等级</h5>
+    </div>
+    <div class="ibox-content fadeInUp animated nopadding collapse in" id="collapseG2" style="height: 200px;">
+        <div class="">
+            <div class="span12" >
+                <div id="bar_double"  style="height:200px;">
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 表单搜索 开始 -->
+<form class="animated form-search" action="__SELF__" onsubmit="return false" method="get">
+
+    <div class="row">
+
+        <div class="col-xs-1">
+            <div class="form-group">
+                <label type="text"  placeholder="游戏编号" >游戏编号</label>
+            </div>
+        </div>
+        <div class="col-xs-3">
+            <div class="form-group">
+                <label type="text" name="game_code" value="{$game_code|default=''}" placeholder="游戏编号" class="input-sm form-control">{$game_code|default=''}</label>
+            </div>
+        </div>
+        <div class="col-xs-1">
+            <div class="form-group">
+                <label type="text"  placeholder="最佳尾号" >最佳尾号</label>
+            </div>
+        </div>
+        <div class="col-xs-3">
+            <div class="form-group">
+                <label type="text" name="best_ending" value="{$best_ending|default=''}" placeholder="最佳尾号" class="input-sm form-control">{$best_ending|default=''}</label>
+            </div>
+        </div>
+
+
+
+    </div>
+
+    <div class="row">
+        <div class="col-xs-3">
+            <div class="form-group">
+                <input type="text" name="username" value="{$Think.get.username|default=''}" placeholder="用户名" class="input-sm form-control">
+            </div>
+        </div>
+        <div class="col-xs-1">
+            <div class="form-group">
+                <button type="submit" class="btn btn-sm btn-white"><i class="fa fa-search"></i> 搜索</button>
+            </div>
+        </div>
+    </div>
+</form>
+<!-- 表单搜索 结束 -->
+
+<form onsubmit="return false;" data-auto="" method="POST">
+    <input type="hidden" value="resort" name="action"/>
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th class='list-table-check-td'>
+                    <input data-none-auto="" data-check-target='.list-check-box' type='checkbox'/>
+                </th>
+                <th class='text-center'>庄家昵称</th>
+                <th class='text-center'>下注额</th>
+                <th class='text-center'>下注倍数</th>
+                <th class='text-center'>开局尾数</th>
+                <th class='text-center'>庄家盈亏</th>
+                <th class='text-center'>下注总额</th>
+                <th class='text-center'>最佳尾数</th>
+                <th class='text-center'>上局剩余积分</th>
+                <th class='text-center'>当前剩余积分</th>
+                <th class='text-center'>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {foreach $list as $key=>$vo}
+            {if $vo.is_banker == 1 }
+            <tr>
+                <td class='list-table-check-td'>
+                    <input class="list-check-box" value='{$vo.id}' type='checkbox'/>
+                </td>
+                <td class='text-center'>{$vo.username}</td>
+                <td class='text-center'>{$vo.bet_num|default="<span style='color:#ccc'>还没有下注总额</span>"}</td>
+                <td class='text-center'>{$vo.bet_times|default="<span style='color:#ccc'>还没有下注倍数</span>"}</td>
+                <td class='text-center'>{$vo.open_ending|default="<span style='color:#ccc'>还没有抢包</span>"}</td>
+                <td class='text-center'>{$vo.pay_result|default="<span style='color:#ccc'>还没有生成结果</span>"}</td>
+                <td class='text-center'>{$vo.bet_total_num|default="<span style='color:#ccc'>还没有总额</span>"}</td>
+                <td class='text-center'>{$vo.best_ending|default="<span style='color:#ccc'>还没有最佳尾数</span>"}</td>
+                <td class='text-center'>{$vo.points_per|default="<span style='color:#ccc'>还没有上局积分</span>"}</td>
+                <td class='text-center'>{$vo.points_now|default="<span style='color:#ccc'>还没有生成积分</span>"}</td>
+
+                <td class='text-center nowrap'>
+                    {if auth("$classuri/edit")}
+                    <span class="text-explode">|</span>
+                    <a data-modal='{:url("$classuri/edit")}?id={$vo.id}' href="javascript:void(0)">编辑</a>
+                    {/if}
+                    {if auth("$classuri/del")}
+                    <span class="text-explode">|</span>
+                    <a data-update="{$vo.id}" data-field='delete' data-action='{:url("$classuri/del")}'
+                       href="javascript:void(0)">删除</a>
+                    {/if}
+                </td>
+
+            </tr>
+            {/if}
+            {/foreach}
+        </tbody>
+    </table>
+    {if isset($page)}<p>{$page}</p>{/if}
+</form>
+
+
+<form onsubmit="return false;" data-auto="" method="POST">
+    <input type="hidden" value="resort" name="action"/>
+    <table class="table table-hover">
+        <thead>
+        <tr>
+            <th class='list-table-check-td'>
+                <input data-none-auto="" data-check-target='.list-check-box' type='checkbox'/>
+            </th>
+            <th class='text-center'>玩家昵称</th>
+            <th class='text-center'>下注额</th>
+            <th class='text-center'>下注倍数</th>
+            <th class='text-center'>开局尾数</th>
+            <th class='text-center'>输赢结果</th>
+            <th class='text-center'>上局剩余积分</th>
+            <th class='text-center'>当前剩余积分</th>
+            <th class='text-center'>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        {foreach $list as $key=>$vo}
+        {if $vo.is_banker == 0 }
+        <tr>
+            <td class='list-table-check-td'>
+                <input class="list-check-box" value='{$vo.id}' type='checkbox'/>
+            </td>
+            <td class='text-center'>{$vo.username}</td>
+            <td class='text-center'>{$vo.bet_num|default="<span style='color:#ccc'>还没有下注</span>"}</td>
+            <td class='text-center'>{$vo.bet_times|default="<span style='color:#ccc'>还没有下注倍数</span>"}</td>
+            <td class='text-center'>{$vo.open_ending|default="<span style='color:#ccc'>还没有抢包</span>"}</td>
+            <td class='text-center'>{$vo.pay_result|default="<span style='color:#ccc'>还没有生成结果</span>"}</td>
+            <td class='text-center'>{$vo.points_per|default="<span style='color:#ccc'>还没有上局积分</span>"}</td>
+            <td class='text-center'>{$vo.points_now|default="<span style='color:#ccc'>还没有生成积分</span>"}</td>
+
+            <td class='text-center nowrap'>
+                {if auth("$classuri/edit")}
+                <span class="text-explode">|</span>
+                <a data-modal='{:url("$classuri/edit")}?id={$vo.id}' href="javascript:void(0)">编辑</a>
+                {/if}
+                {if auth("$classuri/del")}
+                <span class="text-explode">|</span>
+                <a data-update="{$vo.id}" data-field='delete' data-action='{:url("$classuri/del")}'
+                   href="javascript:void(0)">删除</a>
+                {/if}
+            </td>
+
+        </tr>
+        {/if}
+        {/foreach}
+        </tbody>
+    </table>
+    {if isset($page)}<p>{$page}</p>{/if}
+</form>
+
+{/block}
+
+{block name="script"}
+
+<script>
+    console.log(111);
+    console.log(222);
+    require(['echarts', 'echartsext.base', 'echartsext.api'], function (echarts, echarts_base, echarts_api) {
+    //require(['jquery.ztree'], function () {
+        console.log(333);
+
+    var percent_arr = [];
+    var legend_arr = [];
+
+    var  percent = {};
+    percent.name=  111;
+    percent.value =  222;
+
+    percent_arr.push(percent);
+    legend_arr.push(333);
+
+
+    var chart = new echartsApi();
+    var option;
+
+        var x_arr = ['11','22','33']
+        var delay_bar_arr = ['11','22','33']
+        var onTime_bar_arr = ['44','55','66']
+
+        option = chart.api_doublebar(delay_bar_arr, onTime_bar_arr, x_arr)
+        //var Charts = echarts.init(document.getElementById('bar_double'));
+        //Charts.setOption(option)
+        console.log(chart);
+        console.log('option ' + option);
+        console.log('charts ' + Charts);
+
+
+        option = {
+            title: {
+                text: '',
+                subtext: ''
+            },
+            tooltip: {
+                trigger: 'axis'
+            },
+            legend: {
+                data:['最佳尾数','牛牛等级']
+            },
+            toolbox: {
+                show: true,
+                feature: {
+                    dataZoom: {
+                        yAxisIndex: 'none'
+                    },
+                    dataView: {readOnly: false},
+                    magicType: {type: ['line', 'bar']},
+                    restore: {},
+                    saveAsImage: {}
+                }
+            },
+            xAxis:  {
+                type: 'category',
+                boundaryGap: false,
+                data: ['周一','周二','周三','周四','周五','周六','周日']
+            },
+            yAxis: {
+                type: 'value',
+                axisLabel: {
+                    formatter: '{value}'
+                }
+            },
+            series: [
+                {
+                    name:'最佳尾数',
+                    type:'line',
+                    data:[11, 11, 15, 13, 12, 13, 10],
+                    itemStyle : {normal: {label : {show: true}}},
+                    markPoint: {
+                        data: [
+                            {type: 'max', name: '最大值牛等级'},
+                            {type: 'min', name: '最小值'},
+                        ]
+                    },
+                    markLine: {
+                        data: [
+                            {type: 'average', name: '平均值'}
+                        ]
+                    }
+                },
+                {
+                    name:'牛牛等级',
+                    type:'line',
+                    data:[1, -2, 2, 5, 3, 2, 0],
+                    markPoint: {
+                        data: [
+                            {name: '周最低', value: -2, xAxis: 1, yAxis: -1.5}
+                        ]
+                    },
+                    markLine: {
+                        data: [
+                            {type: 'average', name: '平均值'},
+                            [{
+                                symbol: 'none',
+                                x: '90%',
+                                yAxis: 'max'
+                            }, {
+                                symbol: 'circle',
+                                label: {
+                                    normal: {
+                                        position: 'start',
+                                        formatter: '最大值'
+                                    }
+                                },
+                                type: 'max',
+                                name: '最高点'
+                            }]
+                        ]
+                    }
+                }
+            ]
+        };
+
+        var Charts = echarts.init(document.getElementById('bar_double'));
+        Charts.setOption(option)
+
+    });
+</script>
+
+
+
+{/block}

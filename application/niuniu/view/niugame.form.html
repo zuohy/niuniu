@@ -1,0 +1,83 @@
+<form class="layui-form layui-box" style='padding:25px 30px 20px 0' action="__SELF__" data-auto="true" method="post">
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">用户昵称</label>
+        <div class='col-sm-8'>
+
+        <select class="layui-input" name="username" required="required">
+            {if isset($vo.niu_users) }
+            {foreach $vo.niu_users as $key=>$user}
+
+            <option selected="selected" value='{$user.username}'>{$user.username}</option>
+
+            {/foreach}
+            {else}
+            <option selected="selected" value='{$vo.username}'>{$vo.username}</option>
+            {/if}
+        </select>
+
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">用户编码</label>
+        <div class="layui-input-block">
+            <input type="text" readonly="" autofocus name="niu_code" value='{$vo.niu_code|default=""}' pattern="" title="自动生成编码" placeholder="自动生成编码" class="layui-input">
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">下注额</label>
+        <div class="layui-input-block">
+            <input type="tel" autofocus name="bet_num" value='{$vo.bet_num|default=""}' pattern="" title="请输入下注金额" placeholder="请输入下注金额" class="layui-input">
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">下注倍数</label>
+        <div class="layui-input-block">
+            <input type="text" name="bet_times" pattern="" value='{$vo.bet_times|default=""}' title="请输入下注倍数" placeholder="请输入下注倍数" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">尾数</label>
+        <div class="layui-input-block">
+            <input type="text" name="open_ending" pattern="" value='{$vo.open_ending|default=""}' title="请输入尾数" placeholder="请输入尾数" class="layui-input">
+        </div>
+    </div>
+
+    {if isset($vo.is_banker) && $vo.is_banker == 1}
+    <div class="layui-form-item">
+        <label class="layui-form-label">最佳尾数</label>
+        <div class="layui-input-block">
+            <input type="text" name="best_ending" pattern="" value='{$vo.best_ending|default=""}' title="请输入最佳尾数" placeholder="请输入最佳尾数" class="layui-input">
+        </div>
+    </div>
+    {/if}
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">庄家</label>
+        <div class="layui-input-block">
+
+            {if isset($vo.is_banker) && $vo.is_banker == 1}
+            <input type="checkbox" name="is_banker" value="0" title="闲家">
+            <input type="checkbox" checked name="is_banker" value="1" title="庄家">
+            {else}
+            <input type="checkbox" checked name="is_banker" value="0" title="闲家">
+            <input type="checkbox"  name="is_banker" value="1" title="庄家">
+            {/if}
+        </div>
+    </div>
+
+
+    <div class="hr-line-dashed"></div>
+
+    <div class="layui-form-item text-center">
+        {if isset($vo['id'])}<input type='hidden' value='{$vo.id}' name='id'/>{/if}
+        <button class="layui-btn" type='submit'>保存数据</button>
+        <button class="layui-btn layui-btn-danger" type='button' data-confirm="确定要取消编辑吗？" data-close>取消编辑</button>
+    </div>
+
+    <script>window.form.render();</script>
+</form>
+
