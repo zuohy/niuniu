@@ -1,0 +1,95 @@
+{extend name='extra@admin/content'}
+
+{block name="button"}
+<div class="nowrap pull-right" style="margin-top:10px">
+    <button data-modal='{:url("$classuri/add")}' data-title="添加牛用户" class='layui-btn layui-btn-small'><i
+            class='fa fa-plus'></i> 添加牛用户
+    </button>
+    <button data-update data-field='delete' data-action='{:url("$classuri/del")}'
+            class='layui-btn layui-btn-small layui-btn-danger'><i class='fa fa-remove'></i> 删除牛用户
+    </button>
+</div>
+{/block}
+
+{block name="content"}
+
+<!-- 表单搜索 开始 -->
+<form class="animated form-search" action="__SELF__" onsubmit="return false" method="get">
+
+    <div class="row">
+        <div class="col-xs-3">
+            <div class="form-group">
+                <input type="text" name="username" value="{$Think.get.username|default=''}" placeholder="用户名" class="input-sm form-control">
+            </div>
+        </div>
+
+        <div class="col-xs-3">
+            <div class="form-group">
+                <input type="text" name="phone" value="{$Think.get.phone|default=''}" placeholder="手机号" class="input-sm form-control">
+            </div>
+        </div>
+
+        <div class="col-xs-1">
+            <div class="form-group">
+                <button type="submit" class="btn btn-sm btn-white"><i class="fa fa-search"></i> 搜索</button>
+            </div>
+        </div>
+    </div>
+</form>
+<!-- 表单搜索 结束 -->
+
+<form onsubmit="return false;" data-auto="" method="POST">
+    <input type="hidden" value="resort" name="action"/>
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th class='list-table-check-td'>
+                    <input data-none-auto="" data-check-target='.list-check-box' type='checkbox'/>
+                </th>
+                <th class='text-center'>用户编码</th>
+                <th class='text-center'>用户账号</th>
+                <th class='text-center'>手机号</th>
+                <th class='text-center'>电子邮箱</th>
+                <th class='text-center'>当前积分</th>
+                <th class='text-center'>总积分</th>
+                <th class='text-center'>金额状态</th>
+                <th class='text-center'>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {foreach $list as $key=>$vo}
+            <tr>
+                <td class='list-table-check-td'>
+                    <input class="list-check-box" value='{$vo.id}' type='checkbox'/>
+                </td>
+                <td class='text-center'>{$vo.niu_code}</td>
+                <td class='text-center'>{$vo.username}</td>
+                <td class='text-center'>{$vo.phone|default="<span style='color:#ccc'>还没有设置手机号</span>"}</td>
+                <td class='text-center'>{$vo.mail|default="<span style='color:#ccc'>还没有设置邮箱</span>"}</td>
+                <td class='text-center'>{$vo.points_now|default="<span style='color:#ccc'>还没有充值积分</span>"}</td>
+                <td class='text-center'>{$vo.points_total|default="<span style='color:#ccc'>还没有积分</span>"}</td>
+                <td class='text-center'>
+                    {if $vo.points_now <= 100}
+                    <span style="color:red">余额不足</span>
+                    {elseif $vo.points_now > 100}
+                    <span style="color:#090">金额充足</span>
+                    {/if}
+                </td>
+                <td class='text-center nowrap'>
+                    {if auth("$classuri/edit")}
+                    <span class="text-explode">|</span>
+                    <a data-modal='{:url("$classuri/edit")}?id={$vo.id}' href="javascript:void(0)">编辑</a>
+                    {/if}
+                    {if auth("$classuri/del")}
+                    <span class="text-explode">|</span>
+                    <a data-update="{$vo.id}" data-field='delete' data-action='{:url("$classuri/del")}'
+                       href="javascript:void(0)">删除</a>
+                    {/if}
+                </td>
+            </tr>
+            {/foreach}
+        </tbody>
+    </table>
+    {if isset($page)}<p>{$page}</p>{/if}
+</form>
+{/block}
