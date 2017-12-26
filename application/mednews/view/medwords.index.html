@@ -1,0 +1,100 @@
+{extend name='extra@admin/content'}
+
+
+{block name="button"}
+<div class="nowrap pull-right" style="margin-top:10px">
+    <button data-modal='{:url("$classuri/add")}' data-title="开始检测" class='layui-btn layui-btn-small'><i
+            class='fa fa-plus'></i> 开始检测
+    </button>
+    <button data-update data-field='delete' data-action='{:url("$classuri/del")}'
+            class='layui-btn layui-btn-small layui-btn-danger'><i class='fa fa-remove'></i> 关键词
+    </button>
+</div>
+{/block}
+
+{block name="content"}
+
+<!-- 表单搜索 开始 -->
+<form class="animated form-search" action="__SELF__" onsubmit="return false" method="get">
+
+    <div class="row">
+        <div class="col-xs-3">
+            <div class="form-group">
+                <input type="text" name="username" value="{$Think.get.value|default=''}" placeholder="领导姓名" class="input-sm form-control">
+            </div>
+        </div>
+
+        <div class="col-xs-3">
+            <div class="form-group">
+                <input type="text" name="phone" value="{$Think.get.leader_job|default=''}" placeholder="职务" class="input-sm form-control">
+            </div>
+        </div>
+
+        <div class="col-xs-1">
+            <div class="form-group">
+                <button type="submit" class="btn btn-sm btn-white"><i class="fa fa-search"></i> 搜索</button>
+            </div>
+        </div>
+    </div>
+</form>
+<!-- 表单搜索 结束 -->
+
+<div class="panel panel-default news-right" style="overflow:hidden">
+    <div class="panel-heading">内容编辑</div>
+    <div class="row">
+        <div class="col-md-offset-5 col-md-7">
+            <button data-submit type='submit' class="layui-btn" onclick="butTest()">检测</button>
+        </div>
+    </div>
+    <div class="panel-body">
+        <form class="form-horizontal" role="form" name="check_words" action='{:url("$classuri/findwords")}' data-auto="true" method="post">
+
+
+        <div class="form-group">
+            <div class="col-md-6">
+                <textarea name='content_org' style="width: 500px;height: 500px"></textarea>
+
+            </div>
+            <div class="col-md-6" id="test1" style="word-break: break-all; word-wrap:break-word;">
+
+
+            </div>
+        </div>
+            <script>window.form.render();</script>
+        </form>
+    </div>
+
+</div>
+
+<script>
+
+
+function butTest(){
+    var content_org = $("textarea[name='content_org']").val();
+
+    $.ajax({
+
+        url: '{:url("$classuri/findwords")}',
+        type: 'post',
+        data:{content_org:content_org},
+        dataType: 'json',
+        success: function (data) {
+            if(0 == data.code) {
+                alert(data.msg);
+                //location.reload();
+            } else {
+                alert(data.aaa);
+                //$("textarea[name='content_chd']").val(data.aaa);
+                //$("textarea[name='content_chd']").html(data.aaa);
+                $('#test1').html(data.aaa);
+            }
+            return;
+        }
+    });
+
+}
+
+
+</script>
+
+{/block}
