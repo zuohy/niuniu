@@ -40,12 +40,13 @@
 
 <form onsubmit="return false;" data-auto="" method="POST">
     <input type="hidden" value="resort" name="action"/>
-    <table class="table table-hover">
+    <table class="table table-hover" id="table-1">
         <thead>
         <tr>
             <th class='list-table-check-td'>
                 <input data-none-auto="" data-check-target='.list-check-box' type='checkbox'/>
             </th>
+            <th class='text-center'>领导编码</th>
             <th class='text-center'>领导姓名</th>
             <th class='text-center'>领导职务</th>
             <th class='text-center'>领导排序</th>
@@ -54,10 +55,11 @@
         </thead>
         <tbody>
         {foreach $list as $key=>$vo}
-        <tr>
+        <tr id='{$vo.id}'>
             <td class='list-table-check-td'>
                 <input class="list-check-box" value='{$vo.id}' type='checkbox'/>
             </td>
+            <td class='text-center'>{$vo.med_code|default="<span style='color:#ccc'>还没有编码</span>"}</td>
             <td class='text-center'>{$vo.value|default="<span style='color:#ccc'>还没有关键字</span>"}</td>
             <td class='text-center'>{$vo.leader_job|default="<span style='color:#ccc'>还没有职务</span>"}</td>
             <td class='text-center'>{$vo.leader_level|default="<span style='color:#ccc'>还没有排序</span>"}</td>
@@ -69,4 +71,41 @@
     </table>
     {if isset($page)}<p>{$page}</p>{/if}
 </form>
-{/block}
+
+<script type="text/javascript" charset="utf-8">
+    require(['tablednd'], function () {
+
+
+        $(document).ready(function() {
+            // Initialise the table
+            $("#table-1").tableDnD(
+                    {
+
+                        onDrop: function(tt, rr){
+                            var tabletest = tt.rows;
+                            var rowtest = rr.id;
+                            var nnnRow = $('#table-1').tableDnDSerialize();
+                            var newRow = $.tableDnD.serialize();
+                            var b = $(tt.rows[1]).children().eq(1).text();
+
+                            console.log('table:' + tabletest);
+                            console.log('row:' + rowtest);
+                            console.log('newRow:' + newRow);
+                            console.log('nnnRow:' + nnnRow);
+                            console.log('b:' + b);
+                            var testId = isNaN($('#table-1').val());
+                            console.log('testId:' + testId);
+                        }
+
+                    }
+            );
+            // Make a nice striped effect on the table
+            //$("#table-1 tr:even").addClass("alt");
+        })
+
+    });
+
+</script>
+
+
+    {/block}

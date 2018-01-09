@@ -45,7 +45,8 @@ require.config({
         'jquery.masonry': ['../plugs/jquery/masonry.min'],
         'echarts': ['../plugs/echarts/echarts.common.min'],
         'echartsext.api': ['../plugs/echartsext/echarts_api'],
-        'echartsext.base': ['../plugs/echartsext/echarts_base']
+        'echartsext.base': ['../plugs/echartsext/echarts_base'],
+        'tablednd': ['../plugs/tablednd/jquery.tablednd']
 
     },
     shim: {

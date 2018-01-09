@@ -80,10 +80,11 @@ function butTest(){
         dataType: 'json',
         success: function (data) {
             if(0 == data.code) {
-                alert(data.msg);
+                //alert(data.msg);
                 //location.reload();
             } else {
-                alert(data.aaa);
+                //alert(data.aaa);
+                alert('检测完成！');
                 //$("textarea[name='content_chd']").val(data.aaa);
                 //$("textarea[name='content_chd']").html(data.aaa);
                 $('#test1').html(data.aaa);

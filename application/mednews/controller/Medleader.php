@@ -54,6 +54,55 @@ class Medleader extends BasicMed {
         return parent::_list($db);
     }
 
+    /**
+     * 添加领导信息
+     */
+    public function add() {
+        $extData = array();
+        if ($this->request->isPost()) {
+            $postData = $this->request->post();
+            $extData = ['create_by' => session('user.id'), 'type' => '0', 'next_code' => '', 'leader_level' => '3',];
+
+            //查询前一个领导编号
+            $preCode = $postData['pre_code'];
+            $retUserInfo = Db::name($this->table)
+                ->where('med_code', $preCode)
+                ->select();
+            if( isset($retUserInfo) ){
+                $leaderInfo = $retUserInfo[0];
+                $extData['next_code'] = $leaderInfo['next_code'];
+            }
+
+            $extData = array_merge($extData, $postData);
+
+        }
+
+        return $this->_form($this->table, 'form', '', [], $extData);
+    }
+
+    /**
+     * 列表数据处理
+     * @param type $list
+     */
+    protected function _data_filter(&$list) {
+
+        $curUser = $list[0];
+        $curPerCode = $curUser['pre_code'];
+        $curNextCode = $curUser['next_code'];
+        foreach ($list as &$vo) {
+
+            $medCode = $vo['med_code'];
+            if($curPerCode == $medCode){
+                //找到上一个领导
+                break;
+
+            }
+
+        }
+
+
+
+    }
 
 
     /**
@@ -62,14 +111,15 @@ class Medleader extends BasicMed {
      */
     public function _form_filter(&$data) {
 
-       /* if ($this->request->isPost()) {
+       if ($this->request->isPost()) {
 
-            if (isset($data['niu_code']) && $data['niu_code'] == '') {
-                $data['niu_code'] = DataService::createSequence(10, 'NIU');
+            if (isset($data['med_code']) && $data['med_code'] == '') {
+                //新增领导
+                $data['med_code'] = DataService::createSequence(10, 'NIU');
 
             }
 
-            if (isset($data['id'])) {
+            /*if (isset($data['id'])) {
                 $retPoints = parent::pointsCharge($data['id'], '', $data['points_charge']);
                 if( is_array($retPoints) ){
                     $data = array_merge($data, $retPoints);
@@ -77,11 +127,41 @@ class Medleader extends BasicMed {
                 unset($data['username']);
             } elseif (Db::name($this->table)->where('username', $data['username'])->find()) {
                 $this->error('用户昵称已经存在，请使用其它昵称！');
+            }*/
+        } else {
+            //$arrLeader = $data['list'];
+
+        }
+    }
+
+
+    /**
+     * 表单相关表更新
+     * @param array $data
+     */
+    public function _form_relate(&$data) {
+
+        if ($this->request->isPost()) {
+
+            if( isset($data['next_code']) ){
+                //插入领导位置 更新插入位置的领导链接
+                $curCode = $data['med_code'];
+                $nextCode = $data['next_code'];
+                $preCode = $data['pre_code'];
+                $ret= Db::name($this->table)
+                         ->where('med_code', $preCode)->update(['next_code' => $curCode]);
+                $ret = Db::name($this->table)
+                         ->where('med_code', $nextCode)->update(['pre_code' => $curCode]);
+
             }
+
         } else {
             //$data['authorize'] = explode(',', isset($data['authorize']) ? $data['authorize'] : '');
             //$this->assign('authorizes', Db::name('SystemAuth')->select());
-        }*/
+        }
     }
+
+
+
 
 }

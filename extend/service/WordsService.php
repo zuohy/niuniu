@@ -33,8 +33,37 @@ class WordsService {
 
     private static $_allTag = array(",", "/", "\\", ".", ";", ":", "\"", "!", "~", "`", "^", "(", ")", "?", "-", "\t", "\n", "'", "<", ">", "\r", "\r\n","$", "&", "%", "#", "@", "+", "=", "{", "}", "[", "]", "：", "）", "（", "．", "。", "，", "！", "；", "“", "”", "‘", "’", "［", "］", "、", "—", "　", "《", "》", "－", "…", "【", "】",);
     private static $_midTag = array(".", ",", "!", "?", "\r", "\r\n", "。", "，", "！", "？", "；");
-    public $wordLeader = array('习近平', '张文强', '曾微', '张宗良');
-    public $wordJob = array('中共中央总书记', '黔南州委常委、瓮安县委书记', '瓮安县委常委', '瓮安县委常委');
+    public static $wordLeader = array('习近平',
+                                         '张文强', '黄桂林', '潘玉华', '陈博', '曾薇',
+                                         '张宗良', '孟先锋', '陈刚', '黄成', '夏吉友',
+                                         '喻正斌', '符清和', '吴雪嫩', '唐邦水', '贾青鸿',
+                                         '黎建明', '李军', '阮顺坤', '罗惠平', '王华', '刘奉贤',
+        '姚明凤', '张远军', '洪湖',
+        '曾明康', '龚传海', '杨昌勇', '肖福勇', '桂国全',
+        '郑毅', '符合', '王建军', '喻松', '余江', '陈廷高', '王天国');
+    public static $wordJob = array('中共中央总书记',
+                                      '黔南州委常委、瓮安县委书记', '瓮安县委副书记、县长', '瓮安县人大常委会主任', '瓮安县政协主席', '瓮安县委副书记',
+                                      '瓮安县委常委、常务副县长', '瓮安县委常委、统战部部长', '瓮安县委常委、纪委书记', '瓮安县委常委、公安局局长', '瓮安县委常委、宣传部部长',
+                                      '瓮安县委常委、组织部部长', '瓮安县委常委、县委办公室主任', '瓮安县委常委、副县长', '瓮安县委常委、副县长', '瓮安县委常委、副县长',
+                                      '瓮安县委常委、副县长', '瓮安县委常委、副县长', '瓮安县政府党组成员', '瓮安县人大常委会副主任', '瓮安县人大常委会副主任', '瓮安县人大常委会副主任',
+        '瓮安县人大常委会副主任', '瓮安县人大常委会副主任', '瓮安县人大常委会副主任',
+        '瓮安县人民政府副县长', '瓮安县人民政府副县长', '瓮安县人民政府副县长', '瓮安县人民政府副县长', '瓮安县人民政府副县长',
+        '瓮安县政协副主席', '瓮安县政协副主席', '瓮安县政协副主席', '瓮安县政协副主席', '瓮安县政协副主席', '瓮安县政协副主席', '瓮安县政协副主席');
+
+
+    //检查领导结构化
+    public static $arrTagPhase = array(
+        'orgStr' => '',  //原字符串
+        'orgLen' => 0,    //原字符串长度
+        'checkTag' => array(),  //结构化解析
+        'tagStr' => '',  //标记后字符串
+    );
+    public static $arrLeaderUnit = array(
+        'jobTitle' => '',
+        'name' => '',
+        'startPos' => 0,
+        'endPos' => 0,
+    );
 
     /**
      * 防止初始化
@@ -57,6 +86,46 @@ class WordsService {
     private function __clone() {}
 
 
+    /**
+     * 初始化 $arrTagPhase
+     */
+    static public function __initTagPhase(){
+        self::$arrTagPhase['orgStr'] = '';
+        self::$arrTagPhase['orgLen'] = 0;
+        self::$arrTagPhase['checkTag'] = array();
+        self::$arrTagPhase['tagStr'] = '';
+
+        return self::$arrTagPhase;
+
+    }
+    /**
+     * 初始化 $arrLeaderUnit
+     */
+    static public function __initLeaderUnit(){
+        self::$arrLeaderUnit['jobTitle'] = '';
+        self::$arrLeaderUnit['name'] = '';
+        self::$arrLeaderUnit['startPos'] = 0;
+        self::$arrLeaderUnit['endPos'] = 0;
+
+        return self::$arrLeaderUnit;
+
+    }
+    /**
+     * 获取 $wordLeader
+     */
+    static public function getWordLeader(){
+
+        return self::$wordLeader;
+
+    }
+    /**
+     * 获取 $wordJob
+     */
+    static public function getWordJob(){
+
+        return self::$wordJob;
+
+    }
 
     /**
      * 生成字典文件
@@ -173,6 +242,7 @@ class WordsService {
      * @param $strContent 匹配的目标字符串
      * @return null
      */
+    /*
     static public function matchPosString($startType=0, $keyStr, $startPos, $strContent) {
 
         $isMatch = true;
@@ -183,7 +253,7 @@ class WordsService {
 
         $strLen = strlen($strContent);
         $keyStrLen = strlen($keyStr);
-        $pos=$keyStrLen-1;   //匹配开始的位置 默认反向
+        $keyPos=$keyStrLen-1;   //匹配开始的位置 默认反向
         //异常检查
         if($startPos > $strLen){
             return;
@@ -192,14 +262,14 @@ class WordsService {
         if( 0 == $startType ){
             //反向匹配
             //$pos=$keyStrLen;   //匹配开始的位置
-            for( $pos; $pos>=0; $pos-- ){
+            for( $keyPos; $keyPos>=0; $keyPos-- ){
                 if($startPos < 0 ){
                     //检测的字符串没有关键字长，返回false
                     $isMatch = false;
                     break;
                 }
 
-                if($keyStr[$pos] != $strContent[$startPos]){
+                if($keyStr[$keyPos] != $strContent[$startPos]){
                     $isMatch = false;
                     break;
                 }
@@ -207,21 +277,21 @@ class WordsService {
                 $startPos--;
             }
 
-            if($pos < 0 ){
+            if($keyPos < 0 ){
                 //完全匹配
                 $isMatch = true;
             }
         }else{
             //正向匹配
-            $pos=0;   //匹配开始的位置
-            for( $pos; $pos<$keyStrLen; $pos++ ){
+            $keyPos=0;   //匹配开始的位置
+            for( $keyPos; $keyPos<$keyStrLen; $keyPos++ ){
                 if($startPos > $strLen ){
                     //检测的字符串没有关键字长，返回false
                     $isMatch = false;
                     break;
                 }
 
-                if($keyStr[$pos] != $strContent[$startPos]){
+                if($keyStr[$keyPos] != $strContent[$startPos]){
                     $isMatch = false;
                     break;
                 }
@@ -229,7 +299,7 @@ class WordsService {
                 $startPos++;
             }
 
-            if($pos > $keyStrLen ){
+            if($keyPos > $keyStrLen ){
                 //完全匹配
                 $isMatch = true;
             }
@@ -242,6 +312,7 @@ class WordsService {
             );
         return $arrRet;
     }
+*/
 
     /**
      * 字符比对匹配关键字 纯英文
@@ -252,6 +323,7 @@ class WordsService {
      * @param $strContent 匹配的目标字符串
      * @return null
      */
+    /*
     static public function matchString($startType=0, $keyStr, $strContent) {
 
         $isMatch = true;
@@ -316,7 +388,7 @@ class WordsService {
         );
         return $arrRet;
     }
-
+*/
 
     /**
      * 根据标点符号 将字符串分组
@@ -344,30 +416,6 @@ class WordsService {
             //补充逗号
             $aryJu[$index] = $aryJu[$index] . '，';
         }
-/*
-        //查找到特殊字符的位置
-        for($pos=0; $pos<=$mbStrLen; $pos++){
-            $isFind = false;
-
-            foreach($tags as $key => $keyValue ){
-                $strValue = $strContent[$pos];
-
-                $isFind = mb_strpos($strValue, $keyValue);
-                if($isFind == true){
-                    //找到分隔特殊字符
-                    $isFind = false;
-                    $aryPos[] = $pos;
-                }
-            }
-            //$retPos = mb_strpos($strContent, '，');
-        }
-
-        $startPos = 0;
-        foreach($aryPos as $key => $posValue){
-            $aryJu[] = mb_substr($strContent, $startPos, $posValue, 'utf-8');
-            $startPos = $posValue;
-        }
-*/
 
         return $aryJu;
     }
@@ -397,35 +445,39 @@ static public function str_split_unicode($str, $l = 0) {
      */
     static public function c_matchPosString($startType=0, $keyStr, $startPos, $strContent) {
 
-        $isMatch = true;
-
+        $isMatch = false;
+        $arrRet = array(
+            'isMatch' => $isMatch,
+            'pos' => 0
+        );
         if (is_null($strContent)) {
-            return;
+            return $arrRet;
         }
 
         $strLen = mb_strlen($strContent, 'utf8');
         $keyStrLen = mb_strlen($keyStr, 'utf8');
-        $pos=$keyStrLen-1;   //匹配开始的位置 默认反向
+        $keyPos=$keyStrLen-1;   //匹配开始的位置 默认反向
 
         $c_strContent = self::str_split_unicode($strContent);
         $c_keyStr = self::str_split_unicode($keyStr);
 
         //异常检查
         if($startPos > $strLen){
-            return;
+            return $arrRet;
         }
 
         if( 0 == $startType ){
             //反向匹配
             //$pos=$keyStrLen;   //匹配开始的位置
-            for( $pos; $pos>=0; $pos-- ){
+            for( $keyPos; $keyPos>=0; $keyPos-- ){
                 if($startPos < 0 ){
                     //检测的字符串没有关键字长，返回false
                     $isMatch = false;
+                    $startPos = 0;
                     break;
                 }
 
-                if($c_keyStr[$pos] != $c_strContent[$startPos]){
+                if($c_keyStr[$keyPos] != $c_strContent[$startPos]){
                     $isMatch = false;
                     break;
                 }
@@ -433,21 +485,21 @@ static public function str_split_unicode($str, $l = 0) {
                 $startPos--;
             }
 
-            if($pos < 0 ){
+            if($keyPos < 0 ){
                 //完全匹配
                 $isMatch = true;
             }
         }else{
             //正向匹配
-            $pos=0;   //匹配开始的位置
-            for( $pos; $pos<$keyStrLen; $pos++ ){
+            $keyPos=0;   //匹配开始的位置
+            for( $keyPos; $keyPos<$keyStrLen; $keyPos++ ){
                 if($startPos > $strLen ){
                     //检测的字符串没有关键字长，返回false
                     $isMatch = false;
                     break;
                 }
 
-                if($c_keyStr[$pos] != $c_strContent[$startPos]){
+                if($c_keyStr[$keyPos] != $c_strContent[$startPos]){
                     $isMatch = false;
                     break;
                 }
@@ -455,17 +507,15 @@ static public function str_split_unicode($str, $l = 0) {
                 $startPos++;
             }
 
-            if($pos > $keyStrLen ){
+            if($keyPos > $keyStrLen ){
                 //完全匹配
                 $isMatch = true;
             }
 
         }
+        $arrRet['isMatch'] = $isMatch;
+        $arrRet['pos'] = $startPos;
 
-        $arrRet = array(
-            'isMatch' => $isMatch,
-            'pos' => $startPos
-        );
         return $arrRet;
     }
 
@@ -480,10 +530,14 @@ static public function str_split_unicode($str, $l = 0) {
      */
     static public function c_matchString($startType=0, $keyStr, $strContent) {
 
-        $isMatch = true;
+        $isMatch = false;
+        $arrRet = array(
+            'isMatch' => $isMatch,
+            'pos' => 0
+        );
 
         if (is_null($strContent)) {
-            return;
+            return $arrRet;
         }
 
         $strLen = mb_strlen($strContent, 'utf8');
@@ -538,11 +592,202 @@ static public function str_split_unicode($str, $l = 0) {
 
         }
 
-        $arrRet = array(
-            'isMatch' => $isMatch,
-            'pos' => $pos
-        );
+        $arrRet['isMatch'] = $isMatch;
+        $arrRet['pos'] = $pos;
+
         return $arrRet;
     }
+
+    /**
+     * 查找领导名字 模糊查找 混合汉字 英文
+     *
+     * @param $findType 匹配的方式，
+     * @param $keyAry 领导关键字数组
+     * @param $strContent 匹配的目标字符串
+     * @return $tagAry    解析结构
+     */
+    static public function c_findLeader($findType=0, $keyAry, $strContent) {
+
+        $tagAry = self::__initTagPhase();
+
+        if (is_null($strContent)) {
+            return $tagAry;
+        }
+
+        $strLen = mb_strlen($strContent, 'utf8');   //字符串长度
+
+        $tagAry['orgStr'] = $strContent;
+        $tagAry['orgLen'] = $strLen;
+        $tagAry['tagStr'] = $strContent;
+
+        $keyPos = 0;   //关键字开始的位置
+
+
+        foreach($keyAry as $index => $name){
+            $leaderUnit = self::__initLeaderUnit();
+            $c_name = self::str_split_unicode($name);
+            $nameLen = mb_strlen($name, 'utf8');   //关键字长度
+            $startKey = 0;  //匹配开始位置
+            $keyPos = 0;    //关键字位移
+
+            $c_strContent = self::str_split_unicode($tagAry['tagStr']);  //每次循环更新标记的 最新的字符串
+            foreach($c_strContent as $pos => $word){
+                $strCount = count($c_strContent);
+
+                //if($pos+$nameLen > $strCount){
+                    //关键字长度大于字符串长度
+                //    break;
+                //}
+                $fCount = 0;  //每次找到符合匹配的个数
+                $isMach = true;  //是否匹配 模糊匹配
+
+                for($keyPos=0; $keyPos<$nameLen; $keyPos++){
+                    if($pos+$keyPos >= $strCount){
+                    //关键字长度大于字符串长度
+                        break;
+                    }
+
+                    $keyWord = $c_name[$keyPos];
+                    $checkWord = $c_strContent[$pos+$keyPos];
+                    if($checkWord != $keyWord){
+                        $isMach = false;
+
+                    }else{
+                        $isMach = true;
+                        $fCount++;
+                    }
+
+                    if($isMach){
+                        if($keyPos == $nameLen-1){
+                            //echo "个位置开始为＼n";
+                            break;
+                        }
+                    }
+
+                }  //for($keyPos=0; $keyPos<$nameLen; $keyPos++){
+
+
+                //记录匹配开始 匹配至少两个字符
+                if($fCount >= 2){
+                    $leaderUnit['startPos'] = $pos;
+                    $leaderUnit['endPos'] = $pos + ($nameLen-1);
+                    $tagStr = mb_substr($tagAry['tagStr'], $leaderUnit['startPos'], $nameLen, 'utf-8');  //获取关键字
+                    $leaderUnit['name'] = $tagStr;
+
+                    $tagAry['checkTag'][] = $leaderUnit;
+
+                    //标记关键字名字
+                   if($fCount != $nameLen){
+                       $nameEnd = $leaderUnit['startPos'] + $nameLen;
+                       $tagAry['tagStr'] = self::setTagStr('名称', 'blue', $leaderUnit['startPos'], $nameEnd, $tagAry['tagStr'], '关键字错误');
+                   }
+
+                    //匹配领导职务
+                    $jobEnd = $leaderUnit['startPos']-1;
+                    $retJob = self::c_matchPosString(0, self::$wordJob[$index], $jobEnd, $tagAry['tagStr']);
+                    if($retJob['isMatch'] == false){
+                        //标记异常字符, 保存异常字符位置
+                        $exWordsPos = array(
+                            'start' => $retJob['pos'],
+                            'end' => $leaderUnit['startPos']
+                        );
+                        $aryExPos[] = $exWordsPos;
+                        $tagAry['tagStr'] = self::setTagStr('职务', 'red', $exWordsPos['start'], $exWordsPos['end'], $tagAry['tagStr'], '职务错误');
+                    }
+
+                }
+
+
+            } // foreach($c_strContent as $pos => $word){
+
+
+
+        }  //foreach($keyAry as $index => $name){
+
+
+        //领导排序
+        $arrLeaders = $tagAry['checkTag'];
+        $arrNewLeaders = $arrLeaders;
+        $arrTestCheck = array_column($arrNewLeaders,'startPos');
+        array_multisort($arrTestCheck, SORT_ASC, SORT_NUMERIC, $arrNewLeaders);
+
+        $leaderCount = count($arrLeaders);
+        $curNames = '';
+        $isAsc = false;
+        for($i=0; $i<$leaderCount; $i++){
+            $curLeaderPos = $arrLeaders[$i]['startPos'];
+            $curLeaderName = $arrLeaders[$i]['name'];
+            $curNames = $curNames . $curLeaderName . ',';
+
+            $newLeaderPos = $arrNewLeaders[$i]['startPos'];
+            $newLeaderName = $arrNewLeaders[$i]['name'];
+
+
+            if($curLeaderPos != $newLeaderPos){
+                $tagAry['tagStr'] = self::setTagStr('排序错误', 'red', 0, 0, $tagAry['tagStr'], $newLeaderName);
+                $isAsc = true;
+            }
+
+        } // for($i=0; $i<$leaderCount; $i++){
+        if($isAsc == true){
+            $tagAry['tagStr'] = self::setTagStr('排序纠正', 'purple', 0, 0, $tagAry['tagStr'], $curNames);
+        }
+
+        return $tagAry['tagStr'];
+    }
+
+
+    /**
+     * 检查结果字符串
+     * @param  $type 类型 职务 名称 排序
+     * @param $color 标签颜色
+     * @param $startPos 标签起始位置
+     * @param $endPos 标签结束位置
+     * @param $checkedStr 标签字符串
+     * @param $showStr  说明字符串
+     * @return array|string
+     */
+    static public function setTagStr($type='职务', $color, $startPos, $endPos, $checkedStr, $showStr) {
+
+        $tagS = '<span ' . 'style="font-weight:bold; color:' . $color . '"' . '>';
+        $tagE = '</span>';
+
+        if($endPos < 0){
+            $endPos =0;
+        }
+        if($startPos < 0){
+            $startPos=0;
+        }
+        //截断标记的位置
+        $strLen = mb_strlen($checkedStr, 'utf8');
+        $tagLen = $endPos - $startPos;
+        if($startPos >= $endPos){
+            if($type == '职务'){
+                $tagStr = '[缺少信息-' . '职务' . ']';
+            }else if($type == '名称'){
+                $tagStr = '[名称信息-' . $showStr . ']';
+            }else if($type == '排序错误'){
+                $tagStr = '[排序错误-' . $showStr . ']';
+            }else if($type == '排序纠正'){
+                $tagStr = '[排序纠正-' . $showStr . ']';
+            }else{
+                $tagStr = '[缺少信息-' . '职务' . ']';
+            }
+
+
+        }else{
+            $tagStr = mb_substr($checkedStr, $startPos, $tagLen, 'utf-8');
+        }
+
+
+        $headerStr = mb_substr($checkedStr, 0, $startPos, 'utf-8');
+        $endStr = mb_substr($checkedStr, $endPos, $strLen, 'utf-8');
+
+        $newTagStr = $tagS . $tagStr . $tagE;
+
+        $result = $headerStr . $newTagStr . $endStr;
+        return $result;
+    }
+
 
 }

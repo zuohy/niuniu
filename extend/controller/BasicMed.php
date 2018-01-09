@@ -79,7 +79,11 @@ class BasicMed extends Controller {
         if (false !== $this->_callback('_form_filter', $data)) {
             $result = DataService::save($db, $data, $pk, $where);
             if (false !== $this->_callback('_form_result', $result)) {
-                $result !== false ? $this->success('恭喜, 数据保存成功!', '') : $this->error('数据保存失败, 请稍候再试!');
+                //更新关联数据表
+                if (false !== $this->_callback('_form_relate', $data)) {
+                    $result !== false ? $this->success('恭喜, 数据保存成功!', '') : $this->error('数据保存失败, 请稍候再试!');
+                }
+
             }
         }
     }
@@ -167,8 +171,6 @@ class BasicMed extends Controller {
     protected function _resultStr($checkedStr) {
 
         $result = array('aaa' => $checkedStr);
-       //$result = array('aaa' => '<p style="color: red">12312312312312312312312312312312312qweqwe123123123123123123123123qweqew23123123</p> <p>456</p>');
-        //$result = array('aaa' => 'qqqqqqqqqq<span style="color: red">123123123123123123123123123123123123123123123qweqew123123123123123123123</span> bbbbbb<p>456</p>');
 
         return $result;
     }
@@ -186,14 +188,21 @@ class BasicMed extends Controller {
         $tagS = '<span ' . 'style="font-weight:bold; color:' . $color . '"' . '>';
         $tagE = '</span>';
 
+        if($endPos < 0){
+            $endPos =0;
+        }
+        if($startPos < 0){
+            $startPos=0;
+        }
         //截断标记的位置
         $strLen = mb_strlen($checkedStr, 'utf8');
         $tagLen = $endPos - $startPos;
-        if($startPos == $endPos){
+        if($startPos >= $endPos){
             $tagStr = '[缺少信息-' . '职务' . ']';
         }else{
             $tagStr = mb_substr($checkedStr, $startPos, $tagLen, 'utf-8');
         }
+
 
         $headerStr = mb_substr($checkedStr, 0, $startPos, 'utf-8');
         $endStr = mb_substr($checkedStr, $endPos, $strLen, 'utf-8');
