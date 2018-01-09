@@ -213,5 +213,95 @@ class BasicMed extends Controller {
         return $result;
     }
 
+    /**
+     * 检查结果字符串
+     * @param $list 原始列表
+     * @param $curNode 当前列表节点
+     * @param $perCode 前节点编码
+     * @param $nextCode 后节点编码
+     * @return array   排序后的数组列表
+     */
+    protected function _gitLeaderList($list, $curNode, $perCode, $nextCode) {
+        $curUser = $list[0];
+        $curPerCode = $curUser['pre_code'];
+        $curNextCode = $curUser['next_code'];
+
+        $newList = array();
+        //赋值第一个节点
+        $newList[] = $curUser;
+        $pNode = $curPerCode;
+        $nNode = $curNextCode;
+
+        //后续节点
+        while($nNode != ''){
+            $isFind = false;
+            foreach($list as $pos => $vo){
+                $voCode = $vo['med_code'];
+                if($voCode == $nNode){
+                    $isFind = true;
+                    break;
+                }
+            }
+
+            if($isFind == true){
+                $inNode = $list[$pos];
+                array_push($newList, $inNode);
+                $nNode = $vo['next_code'];
+            }else{
+                $nNode = '';
+            }
+
+        }
+
+        //前节点
+        while($pNode != ''){
+            $isFind = false;
+            foreach($list as $pos => $vo){
+                $voCode = $vo['med_code'];
+                if($voCode == $pNode){
+                    $isFind = true;
+                    break;
+                }
+            }
+
+            if($isFind == true){
+                $inNode = $list[$pos];
+                array_unshift($newList, $inNode);
+                $pNode = $vo['pre_code'];
+            }else{
+                $pNode = '';
+            }
+
+        }
+
+        //检查排序
+        $newCount = count($newList);
+        $arrCount = count($list);
+        if($arrCount != $newCount){
+            //补充缺少的节点
+            foreach($list as $pos => $vo){
+                $newFind = false;
+
+                foreach($newList as $index => $newVos){
+                    $orgCode = $vo['med_code'];
+                    $newCode = $newVos['med_code'];
+                    if($orgCode == $newCode){
+                        $newFind = true;
+                        break;
+                    }
+                } //foreach($newList as $index => $newVos){
+                if($newFind == false){
+                    $inNode = $vo;
+                    array_push($newList, $inNode);
+                }
+
+            } //foreach($list as $pos => $vo){
+        } //if($arrCount != $newCount){
+
+        return $newList;
+
+    }
+
+
 
 }

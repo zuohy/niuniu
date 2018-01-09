@@ -56,8 +56,8 @@ class Niuuser extends BasicNiu {
 
 
     /**
-     * 用户添加
-     */
+ * 用户添加
+ */
     public function add() {
         $extData = array();
         if ($this->request->isPost()) {

@@ -726,6 +726,7 @@ static public function str_split_unicode($str, $l = 0) {
             if($curLeaderPos != $newLeaderPos){
                 $tagAry['tagStr'] = self::setTagStr('排序错误', 'red', 0, 0, $tagAry['tagStr'], $newLeaderName);
                 $isAsc = true;
+                break;
             }
 
         } // for($i=0; $i<$leaderCount; $i++){

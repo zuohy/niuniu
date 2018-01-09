@@ -70,14 +70,33 @@ class Medleader extends BasicMed {
                 ->select();
             if( isset($retUserInfo) ){
                 $leaderInfo = $retUserInfo[0];
+                $extData['pre_code'] = $leaderInfo['med_code'];
                 $extData['next_code'] = $leaderInfo['next_code'];
             }
 
             $extData = array_merge($extData, $postData);
 
+        }else{
+            $leaders = $this->getLeaderUsers();
+            $extData['leader_users'] = $leaders;
         }
 
         return $this->_form($this->table, 'form', '', [], $extData);
+    }
+
+
+    /**
+     * 获得领导列表
+     */
+    private function getLeaderUsers() {
+        // 实例Query对象
+        $result = Db::name($this->table)
+            ->field('med_code,value')
+            ->where('is_deleted', '0')
+            ->select();
+
+        return $result;
+
     }
 
     /**
@@ -86,21 +105,10 @@ class Medleader extends BasicMed {
      */
     protected function _data_filter(&$list) {
 
+        $medCon = new BasicMed();
         $curUser = $list[0];
-        $curPerCode = $curUser['pre_code'];
-        $curNextCode = $curUser['next_code'];
-        foreach ($list as &$vo) {
-
-            $medCode = $vo['med_code'];
-            if($curPerCode == $medCode){
-                //找到上一个领导
-                break;
-
-            }
-
-        }
-
-
+        $newList = $medCon->_gitLeaderList($list, $curUser, $curUser['pre_code'], $curUser['next_code']);
+        $list = $newList;
 
     }
 

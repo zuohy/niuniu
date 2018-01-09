@@ -39,7 +39,18 @@
     <div class="layui-form-item">
         <label class="layui-form-label">领导排序</label>
         <div class="layui-input-block">
-            <input type="text" name="pre_code" pattern="" value='{$vo.pre_code|default=""}' title="请输入" placeholder="请输入" class="layui-input">
+
+            <select class="layui-input" name="pre_code" required="required">
+                {if isset($vo.leader_users) }
+                {foreach $vo.leader_users as $key=>$user}
+
+                <option selected="selected" value='{$user.med_code}'>{$user.value}</option>
+
+                {/foreach}
+                {else}
+                <option selected="selected" value='{$vo.med_code}'>{$vo.value}</option>
+                {/if}
+            </select>
         </div>
     </div>
 
